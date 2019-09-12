@@ -19,25 +19,23 @@ const auth = new mongoose.Schema({
 });
 auth.pre("save", function(next) {
   if (this.password && this.isModified("password")) {
-    this.password = cryptoJs.HmacMD5(
+    this.password = cryptoJs.AES.encrypt(
       `${Date()}_${this.password}`,
       process.env.PASSWORD_KEY
-    );
+    ).toString();
   }
   next();
 });
-auth.post("find", function(next) {
-  this.password = cryptoJs.HmacMD5.decrypt(
-    this.password,
-    process.env.PASSWORD_KEY
-  );
+auth.post("find", function(doc, next) {
+  doc.forEach(element => {
+    const bytes = cryptoJs.AES.decrypt(element.password, process.env.PASSWORD_KEY);
+    element.password = bytes.toString(cryptoJs.enc.Utf8);  
+  });
   next();
 });
-auth.post("findOne", function(next) {
-  this.password = cryptoJs.HmacMD5.decrypt(
-    this.password,
-    process.env.PASSWORD_KEY
-  );
+auth.post("findOne", function(doc, next) {
+  const bytes = cryptoJs.AES.decrypt(doc.password, process.env.PASSWORD_KEY);
+  doc.password = bytes.toString(cryptoJs.enc.Utf8);
   next();
 });
 // add model

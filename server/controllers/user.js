@@ -56,7 +56,7 @@ async function ListUser(req, res) {
     if (!Db) {
       res.status(500).json({ message: "fatail connection" });
     } else {
-      const user = await User.find();
+      const user = await User.find().populate("auth");
       res.json(user);
     }
   } catch (error) {
