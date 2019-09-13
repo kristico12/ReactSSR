@@ -26,13 +26,6 @@ auth.pre("save", function(next) {
   }
   next();
 });
-auth.post("find", function(doc, next) {
-  doc.forEach(element => {
-    const bytes = cryptoJs.AES.decrypt(element.password, process.env.PASSWORD_KEY);
-    element.password = bytes.toString(cryptoJs.enc.Utf8);  
-  });
-  next();
-});
 auth.post("findOne", function(doc, next) {
   const bytes = cryptoJs.AES.decrypt(doc.password, process.env.PASSWORD_KEY);
   doc.password = bytes.toString(cryptoJs.enc.Utf8);

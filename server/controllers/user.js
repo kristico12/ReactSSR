@@ -56,7 +56,16 @@ async function ListUser(req, res) {
     if (!Db) {
       res.status(500).json({ message: "fatail connection" });
     } else {
-      const user = await User.find().populate("auth");
+      let user = await User.find().populate("auth");
+      user = user.map(item => {
+        const temp = Object.assign({}, item._doc);
+        const auth = Object.assign({}, temp.auth._doc);
+        delete auth._id;
+        delete auth.token;
+        delete auth.password;
+        temp.auth = auth;
+        return temp;
+      });
       res.json(user);
     }
   } catch (error) {
