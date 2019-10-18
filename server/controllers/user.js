@@ -66,7 +66,34 @@ async function ListUser(req, res) {
         temp.auth = auth;
         return temp;
       });
-      res.json(user);
+      res.json({ data: user});
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+  closeConnectionDB();
+}
+async function Login(req, res) {
+  const Db = connectDB();
+  try {
+    if (!Db) {
+      res.status(500).json({ message: "fatail connection" });
+    } else {
+      const auth = await Auth.findOne({ username: req.body.username });
+      if (auth === null) {
+        res.json({ message: "usuario no encontrado" });
+      } else {
+        if (auth.password === req.body.password) {
+          const token = jwt.sign({ token: auth._id }, process.env.TOKEN_KEY, {
+            expiresIn: "1 days"
+          });
+          auth.token = token;
+          await auth.save();
+          res.status(201).json({ data: token });
+        } else {
+          res.json({ message: "credenciales invalidas" });
+        }
+      }
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -74,4 +101,20 @@ async function ListUser(req, res) {
   closeConnectionDB();
 }
 
-export { CreateUser, ListUser };
+async function GetUser(req, res) {
+  const Db = connectDB();
+  try {
+    if (!Db) {
+      res.status(500).json({ message: "fatail connection" });
+    } else {
+      const auth = await Auth.findById(res.id);
+      const user = await User.findOne({ auth });
+      res.json({ data: user });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+  closeConnectionDB();
+}
+
+export { CreateUser, ListUser, Login, GetUser };

@@ -20,17 +20,21 @@ const auth = new mongoose.Schema({
 auth.pre("save", function(next) {
   if (this.password && this.isModified("password")) {
     this.password = cryptoJs.AES.encrypt(
-      `${Date()}_${this.password}`,
+      `${this.username}_${this.password}`,
       process.env.PASSWORD_KEY
     ).toString();
   }
   next();
 });
 auth.post("findOne", function(doc, next) {
-  const bytes = cryptoJs.AES.decrypt(doc.password, process.env.PASSWORD_KEY);
-  doc.password = bytes.toString(cryptoJs.enc.Utf8);
+  if (doc !== null) {
+    const bytes = cryptoJs.AES.decrypt(doc.password, process.env.PASSWORD_KEY);
+    const aux = bytes.toString(cryptoJs.enc.Utf8);
+    doc.password = aux.slice(aux.indexOf("_") + 1);
+  }
   next();
 });
+
 // add model
 const Auth = mongoose.model("AUTH", auth);
 

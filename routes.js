@@ -7,14 +7,16 @@ import { StaticRouter } from "react-router";
 //import { Provider } from 'react-redux';
 
 // imports
-import { CreateUser, ListUser } from "./server/controllers/user";
-import {} from "./server/controllers/middlewares";
+import { CreateUser, ListUser, Login, GetUser } from "./server/controllers/user";
+import { getUserId } from "./server/controllers/middlewares";
 import { Routes } from "./client/src/routes.jsx";
 //import { store } from './client/src/redux/store';
 
 //|--------------------------------- APIS -------------------------------------|
+router.post("/api/user/login", Login);
 router.post("/api/user/create", CreateUser);
-router.get("/api/user/list", ListUser);
+router.get("/api/user/profile", getUserId, GetUser);
+router.get("/api/user", ListUser);
 /*router.get('/api/:id', isExistSubscriber, (req, res) => {
     res.json(res.idData);
 });
