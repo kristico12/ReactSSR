@@ -1,5 +1,6 @@
 // imports
 import { connectDB, closeConnectionDB } from "../db/index";
+import { Auth } from '../db/userModel';
 import jwt from "jsonwebtoken";
 /*
 async function isExistSubscriber(req, res, next) {
@@ -21,17 +22,20 @@ async function isExistSubscriber(req, res, next) {
     closeConnectionDB();
 }*/
 async function getUserId(req, res, next) {
+    const token = req.headers['access-token'];
     const Db = connectDB();
     try {
         if (!Db) {
             res.status(500).json({ message: "fatail connection" })
         } else {
-            const token = req.headers['access-token'];
             const id = jwt.verify(token,process.env.TOKEN_KEY);
             res.id = id.token;
             next();
         }
     } catch (error) {
+        if (error.message === "jwt expired") {
+           await Auth.findOneAndUpdate({ token }, {token: ''});
+        }
         res.status(500).json({ message: error.message });
     }
     closeConnectionDB();
