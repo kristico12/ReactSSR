@@ -33,7 +33,7 @@ async function getUserId(req, res, next) {
             next();
         }
     } catch (error) {
-        if (error.message === "jwt expired") {
+        if (error.message.includes('jwt')) {
            await Auth.findOneAndUpdate({ token }, {token: ''});
         }
         res.status(500).json({ message: error.message });

@@ -108,7 +108,7 @@ async function GetUser(req, res) {
       res.status(500).json({ message: "fatail connection" });
     } else {
       const auth = await Auth.findById(res.id);
-      const user = await User.findOne({ auth });
+      const user = await User.findOne({ auth: auth._id });
       res.json({ data: user });
     }
   } catch (error) {
